@@ -5,7 +5,7 @@ namespace PhpMyAdmin\SqlParser\Tests\Utils;
 use PhpMyAdmin\SqlParser\Tests\TestCase;
 use PhpMyAdmin\SqlParser\Utils\Formatter;
 
-class FormatTest extends TestCase
+class FormatterTest extends TestCase
 {
     /**
      * @dataProvider mergeFormats
@@ -29,6 +29,7 @@ class FormatTest extends TestCase
                 'indentation' => null,
                 'clause_newline' => null,
                 'parts_newline' => null,
+                'indentation' => null,
             ));
 
         $formatter->expects($this->once())
@@ -41,6 +42,7 @@ class FormatTest extends TestCase
             'indentation' => '    ',
             'clause_newline' => null,
             'parts_newline' => 0,
+            'indentation' => '    ',
             'formats' => $expected,
         );
 
@@ -64,9 +66,6 @@ class FormatTest extends TestCase
                     array(
                         'type' => 0,
                         'flags' => 0,
-                        'html' => '',
-                        'cli' => '',
-                        'function' => '',
                     ),
                 ),
                 'overriding' => array(
@@ -300,7 +299,8 @@ class FormatTest extends TestCase
                     'FROM' . "\n" .
                     '    `tbl`' . "\n" .
                     'WHERE' . "\n" .
-                    '    id = 0 OR id = 1' . "\n" .
+                    '    id = 0' . "\n" .
+                    '    OR id = 1' . "\n" .
                     'GROUP BY' . "\n" .
                     '    id' . "\n" .
                     'ORDER BY' . "\n" .
@@ -313,7 +313,8 @@ class FormatTest extends TestCase
                     "\x1b[35mFROM" . "\n" .
                     "    \x1b[36m`tbl`" . "\n" .
                     "\x1b[35mWHERE" . "\n" .
-                    "    \x1b[39mid = \x1b[92m0 \x1b[35mOR \x1b[39mid = \x1b[92m1" . "\n" .
+                    "    \x1b[39mid = \x1b[92m0" . "\n" .
+                    "    \x1b[35mOR \x1b[39mid = \x1b[92m1" . "\n" .
                     "\x1b[35mGROUP BY" . "\n" .
                     "    \x1b[39mid" . "\n" .
                     "\x1b[35mORDER BY" . "\n" .
@@ -326,7 +327,8 @@ class FormatTest extends TestCase
                     '<span class="sql-reserved">FROM</span>' . '<br/>' .
                     '&nbsp;&nbsp;&nbsp;&nbsp;<span class="sql-variable">`tbl`</span>' . '<br/>' .
                     '<span class="sql-reserved">WHERE</span>' . '<br/>' .
-                    '&nbsp;&nbsp;&nbsp;&nbsp;id = <span class="sql-number">0</span> <span class="sql-reserved">OR</span> id = <span class="sql-number">1</span>' . '<br/>' .
+                    '&nbsp;&nbsp;&nbsp;&nbsp;id = <span class="sql-number">0</span>' . '<br/>' .
+                    '&nbsp;&nbsp;&nbsp;&nbsp;<span class="sql-reserved">OR</span> id = <span class="sql-number">1</span>' . '<br/>' .
                     '<span class="sql-reserved">GROUP BY</span>' . '<br/>' .
                     '&nbsp;&nbsp;&nbsp;&nbsp;id' . '<br/>' .
                     '<span class="sql-reserved">ORDER BY</span>' . '<br/>' .

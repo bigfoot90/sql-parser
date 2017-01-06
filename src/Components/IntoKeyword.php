@@ -205,7 +205,6 @@ class IntoKeyword extends Component
                 break;
             } elseif ($state === 2) {
                 $ret->dest = $token->value;
-
                 $state = 3;
             } elseif ($state == 3) {
                 $ret->parseFileOptions($parser, $list, $token->value);

@@ -402,7 +402,7 @@ class Formatter
                         $curr->type !== Token::TYPE_KEYWORD
                         || (
                             $curr->type === Token::TYPE_KEYWORD
-                            && $curr->flags & Token::FLAG_KEYWORD_FUNCTION
+                            && self::hasFlag($curr, Token::FLAG_KEYWORD_FUNCTION)
                         )
                     )
                 ) {
@@ -428,6 +428,13 @@ class Formatter
                     || (isset($list->tokens[$list->idx - 6]) && isset(JoinKeyword::$JOINS[$list->tokens[$list->idx - 6]->value]))
                 ) {
                     $lineEnded = false;
+                }
+
+                // New line on AND and OR operands
+                if ($curr->type === Token::TYPE_KEYWORD && in_array($curr->value, array('AND', 'OR'), true)
+                    && $list->tokens[$list->idx - 4]->value !== 'BETWEEN'
+                ) {
+                    $lineEnded = true;
                 }
 
                 // Indenting BEGIN ... END blocks.
@@ -466,6 +473,11 @@ class Formatter
                         ++$indent;
                         $lineEnded = true;
                         $shortGroup = false;
+
+                        // MORE Increment indentation when subquery begins by IN( or NOT IN(
+                        if ($list->tokens[$list->idx - 3]->type === Token::TYPE_KEYWORD && in_array($list->tokens[$list->idx - 3]->value, array('IN', 'NOT IN'))) {
+                            ++$indent;
+                        }
                     }
                     array_push($blocksLineEndings, $lineEnded);
                 } elseif ($curr->type === Token::TYPE_OPERATOR && $curr->value === ')') {
@@ -476,6 +488,14 @@ class Formatter
 
                 // Adding the token.
                 $ret .= $this->toString($prev);
+
+                // Add a ` ` between `(` and keywords
+                if ($curr->type === Token::TYPE_OPERATOR && $curr->value === '('
+                    && $prev->type === Token::TYPE_KEYWORD &&
+                    !self::hasFlag($prev, Token::FLAG_KEYWORD_DATA_TYPE | Token::FLAG_KEYWORD_KEY | Token::FLAG_KEYWORD_FUNCTION)
+                ) {
+                    $ret .= ' ';
+                }
 
                 // Finishing the line.
                 if ($lineEnded) {
@@ -665,5 +685,18 @@ class Formatter
         }
 
         return false;
+    }
+
+    /**
+     * Checks if a token is a statement or a clause inside a statement.
+     *
+     * @param Token $token the token to be checked
+     * @param int   $flag  the flag to be checked
+     *
+     * @return bool
+     */
+    public static function hasFlag($token, $flag)
+    {
+        return (bool) ($token->flags & $flag);
     }
 }
